@@ -7,12 +7,9 @@ import (
 	v1 "github.com/robbiekes/goods-manager-api/internal/controller/jsonrpc"
 	"github.com/robbiekes/goods-manager-api/internal/service"
 	"github.com/robbiekes/goods-manager-api/internal/service/repository"
-	"github.com/robbiekes/goods-manager-api/pkg/httpserver"
 	"github.com/robbiekes/goods-manager-api/pkg/postgres"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"os/signal"
-	"syscall"
+	"net/http"
 )
 
 func Run(cfg *config.Config) {
@@ -31,25 +28,27 @@ func Run(cfg *config.Config) {
 	// RPC server
 	log.Info("Initializing RPC server...")
 	rpcServer := rpc.NewServer()
-	v1.NewRpcRouter(rpcServer, services)
-	httpServer := httpserver.New(rpcServer, httpserver.Port(cfg.HTTP.Port))
+	r := v1.NewRpcRouter(rpcServer, services)
+	// httpServer := httpserver.New(r, httpserver.Port(cfg.HTTP.Port))
 
-	// Waiting signal
-	log.Info("Configuring graceful shutdown...")
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	select {
-	case s := <-interrupt:
-		log.Info("app - Run - signal: " + s.String())
-	case err = <-httpServer.Notify():
-		log.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
-	}
-
-	// // Graceful shutdown
-	log.Info("Shutting down...")
-	err = httpServer.Shutdown()
-	if err != nil {
-		log.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
-	}
+	http.ListenAndServe(":8080", r)
+	//
+	// // Waiting signal
+	// log.Info("Configuring graceful shutdown...")
+	// interrupt := make(chan os.Signal, 1)
+	// signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
+	//
+	// select {
+	// case s := <-interrupt:
+	// 	log.Info("app - Run - signal: " + s.String())
+	// case err = <-httpServer.Notify():
+	// 	log.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
+	// }
+	//
+	// // // Graceful shutdown
+	// log.Info("Shutting down...")
+	// err = httpServer.Shutdown()
+	// if err != nil {
+	// 	log.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
+	// }
 }

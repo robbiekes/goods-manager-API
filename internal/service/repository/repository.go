@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"github.com/robbiekes/goods-manager-api/internal/entity"
 	"github.com/robbiekes/goods-manager-api/pkg/postgres"
 )
 
@@ -14,46 +15,38 @@ func NewRepo(pg *postgres.Postgres) *Repository {
 	return &Repository{pg: pg}
 }
 
-func (repo *Repository) ItemsList(ctx context.Context, storageID int) (int, error) {
-	sql, args, err := repo.pg.Builder.
-		Select("itemID").
-		From("items").
-		Where("storageID = ? AND reserved = false", storageID).
-		ToSql()
+func (repo *Repository) ItemsList(ctx context.Context, storageID int) ([]entity.Item, error) {
+	sql := `
+		select i.id, i.name, i.size
+		from items as i
+		join items_storages as i_s
+		on i.id = i_s.item_id
+		where i_s.storage_id = $1 and i_s.reserved = false
+	`
+	var items []entity.Item
 
+	rows, err := repo.pg.Pool.Query(ctx, sql, storageID)
 	if err != nil {
-		return 0, fmt.Errorf("repo - ItemsList - a.Builder: %w", err)
-	}
-
-	var itemsLeft []int
-
-	rows, err := repo.pg.Pool.Query(ctx, sql, args...)
-	if err != nil {
-		return 0, fmt.Errorf("repo - ItemsList - a.Pool.QueryRow: %w", err)
+		return nil, fmt.Errorf("repo - ItemsList - a.Pool.QueryRow: %w", err)
 	}
 
 	defer rows.Close()
 
-	err = rows.Scan(&itemsLeft)
+	err = rows.Scan(&items)
 	if err != nil {
-		return 0, fmt.Errorf("repo - ItemsList - rows.Scan: %w", err)
+		return nil, fmt.Errorf("repo - ItemsList - rows.Scan: %w", err)
 	}
 
-	return len(itemsLeft), nil
+	return items, nil
 }
 
 func (repo *Repository) ReserveItems(ctx context.Context, itemIDs []int64, storageID int) error {
-	// if item doesn't exist in storage, skip it or if it's single in the request, return error
-	sql, args, err := repo.pg.Builder.
-		Update("items").
-		Set("reserved", "true").
-		Where("itemID in $1 AND storageID = $2", itemIDs, storageID).
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("repo - ReserveItems - a.Builder: %w", err)
-	}
-
-	_, err = repo.pg.Pool.Exec(ctx, sql, args...)
+	sql := `
+		update items_storages
+		set reserved = true
+		where item_id in $1 and storage_id = $2
+	`
+	_, err := repo.pg.Pool.Exec(ctx, sql, itemIDs, storageID)
 	if err != nil {
 		return fmt.Errorf("repo - ReserveItems - a.Pool.Exec: %w", err)
 	}
@@ -62,18 +55,14 @@ func (repo *Repository) ReserveItems(ctx context.Context, itemIDs []int64, stora
 }
 
 func (repo *Repository) CancelReservation(ctx context.Context, itemIDs []int64, storageID int) error {
-	sql, args, err := repo.pg.Builder.
-		Update("items").
-		Set("reserved", "false").
-		Where("itemID in ? AND storageID = ?", itemIDs, storageID).
-		ToSql()
+	sql := `
+		update items_storages
+		set reserved = false
+		where item_id in $1 and storage_id = $2
+	`
+	_, err := repo.pg.Pool.Exec(ctx, sql, itemIDs, storageID)
 	if err != nil {
-		return fmt.Errorf("repo - CancelReservation - a.Builder: %w", err)
-	}
-
-	_, err = repo.pg.Pool.Exec(ctx, sql, args...)
-	if err != nil {
-		return fmt.Errorf("repo - CancelReservation - a.Pool.Exec: %w", err)
+		return fmt.Errorf("repo - ReserveItems - a.Pool.Exec: %w", err)
 	}
 
 	return nil
