@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS storage (
+    id SERIAL NOT NULL UNIQUE,
+    name VARCHAR(299) NOT NULL,
+    allowed BOOLEAN
+);
+
+CREATE TABLE IF NOT EXISTS item (
+    id INTEGER NOT NULL UNIQUE,
+    name VARCHAR(299) NOT NULL,
+    size VARCHAR(10) NOT NULL,
+    amount INT
+);
+
+CREATE TABLE IF NOT EXISTS items (
+    itemID INTEGER NOT NULL
+        REFERENCES item (id) ON DELETE RESTRICT,
+    storageID INTEGER NOT NULL
+        REFERENCES storage (id) ON DELETE RESTRICT,
+    reserved BOOLEAN
+);
+
+
