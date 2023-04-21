@@ -32,3 +32,7 @@ migrate-create:  ### create new migration
 migrate-up: ### migration up
 	migrate -database '$(PG_URL)?sslmode=disable' -path db/migrations up
 .PHONY: migrate-up
+
+run-test: ### run all tests in the project
+	go test ./internal/service
+.PHONY: run-test

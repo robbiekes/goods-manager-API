@@ -18,12 +18,8 @@ func NewService(repo GoodsManagerRepo) *GoodsManagerService {
 func (s *GoodsManagerService) ItemsAmount(ctx context.Context, storageID int) (int, error) {
 	items, err := s.repo.ItemsAmount(ctx, storageID)
 	if err != nil {
-		return 0, errors.Wrap(err, "getting items")
+		return 0, errors.Wrap(err, "getting items amount")
 	}
-
-	// if items == 0 {
-	// 	return 0, errors.Wrap(err, "empty items list")
-	// }
 
 	return items, nil
 }

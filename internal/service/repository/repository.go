@@ -15,6 +15,8 @@ func NewRepo(pg *postgres.Postgres) *Repository {
 	return &Repository{pg: pg}
 }
 
+// TODO: protect tables from concurrent data access
+
 func (repo *Repository) ItemsAmount(ctx context.Context, storageID int) (int, error) {
 	rowExists, err := repo.checkStorageExistence(ctx, storageID)
 	if err != nil {

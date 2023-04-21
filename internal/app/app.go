@@ -32,23 +32,4 @@ func Run(cfg *config.Config) {
 	// httpServer := httpserver.New(r, httpserver.Port(cfg.HTTP.Port))
 
 	http.ListenAndServe(":8080", r)
-
-	// // Waiting signal
-	// log.Info("Configuring graceful shutdown...")
-	// interrupt := make(chan os.Signal, 1)
-	// signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
-	//
-	// select {
-	// case s := <-interrupt:
-	// 	log.Info("app - Run - signal: " + s.String())
-	// case err = <-httpServer.Notify():
-	// 	log.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
-	// }
-	//
-	// // // Graceful shutdown
-	// log.Info("Shutting down...")
-	// err = httpServer.Shutdown()
-	// if err != nil {
-	// 	log.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
-	// }
 }
