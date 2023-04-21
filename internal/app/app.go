@@ -29,7 +29,6 @@ func Run(cfg *config.Config) {
 	log.Info("Initializing RPC server...")
 	rpcServer := rpc.NewServer()
 	r := v1.NewRpcRouter(rpcServer, services)
-	// httpServer := httpserver.New(r, httpserver.Port(cfg.HTTP.Port))
 
 	http.ListenAndServe(":8080", r)
 }
