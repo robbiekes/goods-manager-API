@@ -12,7 +12,15 @@ import (
 	"net/http"
 )
 
-func Run(cfg *config.Config) {
+func Run(configPath string) {
+	// Configuration
+	cfg, err := config.NewConfig(configPath)
+	if err != nil {
+		log.Fatalf("Config error: %s", err)
+	}
+
+	SetLogrus(cfg.Log.Level)
+
 	// Repository
 	log.Info("Initializing postgres storage")
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))

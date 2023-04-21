@@ -3,9 +3,7 @@ JSON-RPC API для управления товарами на складе с �
 
 ## Инструкция по запуску сервиса
 Установите migrate такой командой: `go install github.com/golang-migrate/migrate/v4/cmd/migrate`
-Подключитесь локально к Postgres `psql -h {host} -p {port} -d {db_name} -U {username} -W {password}`
-Создайте файлы миграции `migrate create -ext sql -dir db/migrations -seq goods`
-Запустите миграцию `migrate -database postgres://{username}:{password}@localhost:5432/{db_name} -path db/migrations up`
+Запустите сервис командой `make compose-up`
 
 ## Инструкция по запуску тестов
 Установите библиотеку gomock `go get github.com/golang/mock/gomock`

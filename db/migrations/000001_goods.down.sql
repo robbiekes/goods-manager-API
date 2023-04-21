@@ -1,4 +1,3 @@
 DROP TABLE IF EXISTS items_storages;
 DROP TABLE IF EXISTS items;
 DROP TABLE IF EXISTS storages;
-

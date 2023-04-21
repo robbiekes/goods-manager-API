@@ -1,0 +1,12 @@
+app:
+  name: 'goods-manager-api'
+  version: '1.0.0'
+
+http:
+  port: 8080
+
+log:
+  level: 'debug'
+
+postgres:
+  max_pool_size: 20
