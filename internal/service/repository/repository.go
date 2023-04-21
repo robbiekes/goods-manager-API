@@ -22,16 +22,11 @@ func (repo *Repository) ItemsAmount(ctx context.Context, storageID int) (int, er
 	`
 	var items int
 
-	rows, err := repo.pg.Pool.Query(ctx, sql, storageID)
-	if err != nil {
-		return 0, fmt.Errorf("repo - ItemsList - a.Pool.QueryRow: %w", err)
-	}
+	rows := repo.pg.Pool.QueryRow(ctx, sql, storageID)
 
-	defer rows.Close()
-
-	err = rows.Scan(&items)
+	err := rows.Scan(&items)
 	if err != nil {
-		return 0, fmt.Errorf("repo - ItemsList - rows.Scan: %w", err)
+		return 0, fmt.Errorf("repo - ItemsAmount - rows.Scan: %w", err)
 	}
 
 	return items, nil
@@ -46,7 +41,7 @@ func (repo *Repository) ReserveItems(ctx context.Context, itemIDs []int64, stora
 			when true then (reserved + 1)
 			else reserved
 		end
-	where item_id in $1 and storage_id = $2;
+	where item_id = any($1) and storage_id = $2;
 	`
 	_, err := repo.pg.Pool.Exec(ctx, sql, itemIDs, storageID)
 	if err != nil {
@@ -64,7 +59,7 @@ func (repo *Repository) CancelReservation(ctx context.Context, itemIDs []int64, 
 			when true then (reserved - 1)
 			else reserved
 		end
-	where item_id in $1 and storage_id = $2;
+	where item_id = any($1) and storage_id = $2;
 	`
 	_, err := repo.pg.Pool.Exec(ctx, sql, itemIDs, storageID)
 	if err != nil {
