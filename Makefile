@@ -36,3 +36,11 @@ migrate-up: ### migration up
 migrate-down: ### migration down
 	echo "y" | migrate -path db/migrations -database '$(PG_URL_LOCALHOST)?sslmode=disable' down
 .PHONY: migrate-down
+
+mockgen: ### generate mocks
+	 mockgen -source=internal/service/interfaces.go -destination=internal/service/mocks/goods_mock.go -package=mocks
+.PHONY: mockgen
+
+run-test: ### run tests
+	 go test ./internal/service
+.PHONY: run-test

@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/golang/mock/gomock"
-	"github.com/robbiekes/goods-manager-api/internal/service/mock"
+	"github.com/robbiekes/goods-manager-api/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"testing"
@@ -17,7 +17,7 @@ func TestGoodsManagerService_ItemsAmount(t *testing.T) {
 	type TestCases struct {
 		Name         string
 		StorageID    int
-		Expectations func(r *mock.MockGoodsManagerRepo)
+		Expectations func(r *mocks.MockGoodsManagerRepo)
 		Expected     int
 		Error        assert.ErrorAssertionFunc
 	}
@@ -25,7 +25,7 @@ func TestGoodsManagerService_ItemsAmount(t *testing.T) {
 	testcases := []TestCases{
 		{
 			Name: "OK",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().ItemsAmount(ctx, 1).Return(5, nil)
 			},
 			StorageID: 1,
@@ -34,7 +34,7 @@ func TestGoodsManagerService_ItemsAmount(t *testing.T) {
 		},
 		{
 			Name: "Error getting items amount",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().ItemsAmount(ctx, 1).Return(0, testError)
 			},
 			StorageID: 1,
@@ -47,7 +47,7 @@ func TestGoodsManagerService_ItemsAmount(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			goodsManagerMock := mock.NewMockGoodsManagerRepo(ctrl)
+			goodsManagerMock := mocks.NewMockGoodsManagerRepo(ctrl)
 
 			tc.Expectations(goodsManagerMock)
 
@@ -70,7 +70,7 @@ func TestGoodsManagerService_ReserveItems(t *testing.T) {
 		Name         string
 		StorageID    int
 		ItemIDs      []int64
-		Expectations func(r *mock.MockGoodsManagerRepo)
+		Expectations func(r *mocks.MockGoodsManagerRepo)
 		Error        assert.ErrorAssertionFunc
 	}
 
@@ -79,7 +79,7 @@ func TestGoodsManagerService_ReserveItems(t *testing.T) {
 	testcases := []TestCases{
 		{
 			Name: "OK",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().ReserveItems(ctx, items, 1).Return(nil)
 			},
 			StorageID: 1,
@@ -88,7 +88,7 @@ func TestGoodsManagerService_ReserveItems(t *testing.T) {
 		},
 		{
 			Name: "Error empty items list",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().ReserveItems(ctx, []int64{}, 1).Return(ErrEmptyItemsList)
 			},
 			StorageID: 1,
@@ -97,7 +97,7 @@ func TestGoodsManagerService_ReserveItems(t *testing.T) {
 		},
 		{
 			Name: "Error reserving items",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().ReserveItems(ctx, items, 1).Return(testError)
 			},
 			StorageID: 1,
@@ -111,7 +111,7 @@ func TestGoodsManagerService_ReserveItems(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			goodsManagerMock := mock.NewMockGoodsManagerRepo(ctrl)
+			goodsManagerMock := mocks.NewMockGoodsManagerRepo(ctrl)
 
 			tc.Expectations(goodsManagerMock)
 
@@ -132,7 +132,7 @@ func TestGoodsManagerService_CancelReservation(t *testing.T) {
 		Name         string
 		StorageID    int
 		ItemIDs      []int64
-		Expectations func(r *mock.MockGoodsManagerRepo)
+		Expectations func(r *mocks.MockGoodsManagerRepo)
 		Error        assert.ErrorAssertionFunc
 	}
 
@@ -141,7 +141,7 @@ func TestGoodsManagerService_CancelReservation(t *testing.T) {
 	testcases := []TestCases{
 		{
 			Name: "OK",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().CancelReservation(ctx, items, 1).Return(nil)
 			},
 			StorageID: 1,
@@ -150,7 +150,7 @@ func TestGoodsManagerService_CancelReservation(t *testing.T) {
 		},
 		{
 			Name: "Error empty items list",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().CancelReservation(ctx, []int64{}, 1).Return(ErrEmptyItemsList)
 			},
 			StorageID: 1,
@@ -159,7 +159,7 @@ func TestGoodsManagerService_CancelReservation(t *testing.T) {
 		},
 		{
 			Name: "Error cancelling items reservation",
-			Expectations: func(r *mock.MockGoodsManagerRepo) {
+			Expectations: func(r *mocks.MockGoodsManagerRepo) {
 				r.EXPECT().CancelReservation(ctx, items, 1).Return(testError)
 			},
 			StorageID: 1,
@@ -173,7 +173,7 @@ func TestGoodsManagerService_CancelReservation(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			goodsManagerMock := mock.NewMockGoodsManagerRepo(ctrl)
+			goodsManagerMock := mocks.NewMockGoodsManagerRepo(ctrl)
 
 			tc.Expectations(goodsManagerMock)
 
