@@ -23,7 +23,7 @@ func Run(cfg *config.Config) {
 
 	// Service
 	log.Info("Initializing service...")
-	services := service.NewService(repository.NewRepo(nil))
+	services := service.NewService(repository.NewRepo(pg))
 
 	// RPC server
 	log.Info("Initializing RPC server...")
@@ -32,7 +32,7 @@ func Run(cfg *config.Config) {
 	// httpServer := httpserver.New(r, httpserver.Port(cfg.HTTP.Port))
 
 	http.ListenAndServe(":8080", r)
-	//
+
 	// // Waiting signal
 	// log.Info("Configuring graceful shutdown...")
 	// interrupt := make(chan os.Signal, 1)

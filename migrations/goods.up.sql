@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS items_storages
     item_id    INTEGER NOT NULL REFERENCES items (id) ON DELETE RESTRICT,
     storage_id INTEGER NOT NULL REFERENCES storages (id) ON DELETE RESTRICT,
     amount     INTEGER,
-    reserved   BOOLEAN
+    reserved   INTEGER
 );

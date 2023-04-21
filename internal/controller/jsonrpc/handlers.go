@@ -36,19 +36,19 @@ func (r *Router) CancelReservation(_ *http.Request, req *CancelReservationInput,
 	return nil
 }
 
-func (r *Router) ItemsList(_ *http.Request, req *ItemsListInput, resp *ItemsListOutput) error {
+func (r *Router) ItemsAmount(_ *http.Request, req *ItemsListInput, resp *ItemsListOutput) error {
 	ctx := context.Background()
 
 	if req == nil {
 		return errors.New("empty input")
 	}
 
-	items, err := r.service.ItemsList(ctx, req.StorageID)
+	items, err := r.service.ItemsAmount(ctx, req.StorageID)
 	if err != nil {
 		return errors.Wrap(err, "getting items")
 	}
 
-	resp.Amount = len(items)
+	resp.Amount = items
 
 	return nil
 }

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/robbiekes/goods-manager-api/internal/entity"
 	"github.com/robbiekes/goods-manager-api/pkg/postgres"
 )
 
@@ -15,36 +14,39 @@ func NewRepo(pg *postgres.Postgres) *Repository {
 	return &Repository{pg: pg}
 }
 
-func (repo *Repository) ItemsList(ctx context.Context, storageID int) ([]entity.Item, error) {
+func (repo *Repository) ItemsAmount(ctx context.Context, storageID int) (int, error) {
 	sql := `
-		select i.id, i.name, i.size
-		from items as i
-		join items_storages as i_s
-		on i.id = i_s.item_id
-		where i_s.storage_id = $1 and i_s.reserved = false
+		select SUM(amount - reserved)
+		from items_storages
+		where storage_id = $1;
 	`
-	var items []entity.Item
+	var items int
 
 	rows, err := repo.pg.Pool.Query(ctx, sql, storageID)
 	if err != nil {
-		return nil, fmt.Errorf("repo - ItemsList - a.Pool.QueryRow: %w", err)
+		return 0, fmt.Errorf("repo - ItemsList - a.Pool.QueryRow: %w", err)
 	}
 
 	defer rows.Close()
 
 	err = rows.Scan(&items)
 	if err != nil {
-		return nil, fmt.Errorf("repo - ItemsList - rows.Scan: %w", err)
+		return 0, fmt.Errorf("repo - ItemsList - rows.Scan: %w", err)
 	}
 
 	return items, nil
 }
 
 func (repo *Repository) ReserveItems(ctx context.Context, itemIDs []int64, storageID int) error {
+
 	sql := `
-		update items_storages
-		set reserved = true
-		where item_id in $1 and storage_id = $2
+	update items_storages
+		set reserved = 
+		case reserved < amount and amount > 0
+			when true then (reserved + 1)
+			else reserved
+		end
+	where item_id in $1 and storage_id = $2;
 	`
 	_, err := repo.pg.Pool.Exec(ctx, sql, itemIDs, storageID)
 	if err != nil {
@@ -57,8 +59,12 @@ func (repo *Repository) ReserveItems(ctx context.Context, itemIDs []int64, stora
 func (repo *Repository) CancelReservation(ctx context.Context, itemIDs []int64, storageID int) error {
 	sql := `
 		update items_storages
-		set reserved = false
-		where item_id in $1 and storage_id = $2
+		set reserved = 
+		case reserved > 0 
+			when true then (reserved - 1)
+			else reserved
+		end
+	where item_id in $1 and storage_id = $2;
 	`
 	_, err := repo.pg.Pool.Exec(ctx, sql, itemIDs, storageID)
 	if err != nil {

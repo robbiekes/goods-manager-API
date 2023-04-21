@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"github.com/pkg/errors"
-	"github.com/robbiekes/goods-manager-api/internal/entity"
 )
 
 var ErrEmptyItemsList = errors.New("empty items list")
@@ -16,15 +15,15 @@ func NewService(repo GoodsManagerRepo) *GoodsManagerService {
 	return &GoodsManagerService{repo: repo}
 }
 
-func (s *GoodsManagerService) ItemsList(ctx context.Context, storageID int) ([]entity.Item, error) {
-	items, err := s.repo.ItemsList(ctx, storageID)
+func (s *GoodsManagerService) ItemsAmount(ctx context.Context, storageID int) (int, error) {
+	items, err := s.repo.ItemsAmount(ctx, storageID)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting items")
+		return 0, errors.Wrap(err, "getting items")
 	}
 
-	if items == nil {
-		return nil, errors.Wrap(err, "empty items list")
-	}
+	// if items == 0 {
+	// 	return 0, errors.Wrap(err, "empty items list")
+	// }
 
 	return items, nil
 }
